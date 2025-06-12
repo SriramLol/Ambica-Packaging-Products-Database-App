@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Reels Inventory</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+  <style>
+    body {
+      font-family: 'Inter', sans-serif;
+      margin: 0;
+      padding: 30px;
+      background-color: #f8f9fa;
+      color: #333;
+    }
+
+    h1 {
+      margin-bottom: 30px;
+      font-size: 28px;
+    }
+
+    form {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 15px;
+      margin-bottom: 30px;
+      align-items: center;
+    }
+
+    input, select, button {
+      padding: 10px;
+      font-size: 14px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+    }
+
+    button {
+      background-color: #0078d7;
+      color: white;
+      border: none;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background-color: #005fa3;
+    }
+
+    .controls {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+      margin-bottom: 20px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      background-color: white;
+    }
+
+    th, td {
+      padding: 10px;
+      border: 1px solid #dee2e6;
+      text-align: center;
+    }
+
+    th {
+      background-color: #e9ecef;
+      font-weight: 600;
+    }
+
+    #reelsTableBody td.hidden {
+      display: none;
+    }
+  </style>
+</head>
+<body>
+  <h1>Reels Inventory</h1>
+
+  <form id="reelForm">
+    <input type="date" id="date" required>
+    <input type="text" id="company" placeholder="Company Name" required>
+    <input type="number" id="size" placeholder="Size (cm)" required>
+    <input type="number" id="gsm" placeholder="GSM" required>
+    <input type="number" id="bf" placeholder="BF" required>
+    <input type="number" id="weight" placeholder="Weight (kg)" required>
+    <input type="number" id="amount" placeholder="Amount" required>
+    <select id="type" required>
+      <option value="">Type</option>
+      <option value="Craft Paper">Craft Paper</option>
+      <option value="Duplex Board">Duplex Board</option>
+    </select>
+    <button type="submit">Add Reel</button>
+  </form>
+
+  <div class="controls">
+    <label for="sortBy">Sort by:</label>
+    <select id="sortBy">
+      <option value="date">Date</option>
+      <option value="company">Company</option>
+      <option value="type">Type</option>
+    </select>
+
+    <label>Show Columns:</label>
+    <label><input type="checkbox" class="columnToggle" value="date" checked> Date</label>
+    <label><input type="checkbox" class="columnToggle" value="company" checked> Company</label>
+    <label><input type="checkbox" class="columnToggle" value="size" checked> Size</label>
+    <label><input type="checkbox" class="columnToggle" value="gsm" checked> GSM</label>
+    <label><input type="checkbox" class="columnToggle" value="bf" checked> BF</label>
+    <label><input type="checkbox" class="columnToggle" value="weight" checked> Weight</label>
+    <label><input type="checkbox" class="columnToggle" value="amount" checked> Amount</label>
+    <label><input type="checkbox" class="columnToggle" value="type" checked> Type</label>
+    <button onclick="refreshData()" style="margin-left: auto;">🔄 Refresh</button>
+  </div>
+
+  <table>
+    <thead>
+      <tr>
+        <th class="col-date">Date</th>
+        <th class="col-company">Company</th>
+        <th class="col-size">Size (cm)</th>
+        <th class="col-gsm">GSM</th>
+        <th class="col-bf">BF</th>
+        <th class="col-weight">Weight (kg)</th>
+        <th class="col-amount">Amount</th>
+        <th class="col-type">Type</th>
+      </tr>
+    </thead>
+    <tbody id="reelsTableBody"></tbody>
+  </table>
+
+  <script src="renderer-inventory.js"></script>
+</body>
+</html>

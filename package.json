@@ -1,0 +1,13 @@
+{
+  "name": "big-daddy-app",
+  "version": "1.0.0",
+  "description": "Offline inventory and order manager with SQLite",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron ."
+  },
+  "dependencies": {
+    "better-sqlite3": "^11.10.0",
+    "sql.js": "^1.13.0"
+  }
+}
