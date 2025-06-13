@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Gum Inventory</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+  <style>
+    body {
+      font-family: 'Inter', sans-serif;
+      margin: 0;
+      padding: 30px;
+      background-color: #121212;
+      color: white;
+    }
+    h1 {
+      margin-bottom: 30px;
+      font-size: 28px;
+    }
+    form {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 15px;
+      margin-bottom: 30px;
+      align-items: center;
+    }
+    input, select, button {
+      padding: 10px;
+      font-size: 14px;
+      border: 1px solid #444;
+      border-radius: 5px;
+      background-color: #1e1e1e;
+      color: white;
+    }
+    button {
+      background-color: #0078d7;
+      color: white;
+      border: none;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #005fa3;
+    }
+    .controls {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+      margin-bottom: 20px;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      background-color: #1f1f1f;
+    }
+    th, td {
+      padding: 10px;
+      border: 1px solid #333;
+      text-align: center;
+    }
+    th {
+      background-color: #2b2b2b;
+      font-weight: 600;
+    }
+    #tableBody td.hidden {
+      display: none;
+    }
+    .top-right-menu {
+      position: absolute;
+      top: 20px;
+      right: 30px;
+    }
+  </style>
+</head>
+<body>
+  <div class="top-right-menu">
+    <label for="inventoryType">Inventory:</label>
+    <select id="inventoryType">
+      <option value="reels">Reels</option>
+      <option value="gum" selected>Gum</option>
+      <option value="wire">Stitching Wire</option>
+    </select>
+  </div>
+  <h1>Gum Inventory</h1>
+  <form id="gumForm">
+    <input type="text" id="type" placeholder="Type (Corrugation/Pasting)" required>
+    <input type="number" id="amount" placeholder="Amount" required>
+    <button type="submit">Add Gum</button>
+  </form>
+  <table>
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Amount</th>
+      </tr>
+    </thead>
+    <tbody id="tableBody"></tbody>
+  </table>
+ <script>
+  document.getElementById('inventoryType').addEventListener('change', function () {
+    const page = this.value === 'reels' ? 'inventory.html' : this.value + ".html";
+    window.location.href = page;
+  });
+</script>
+
+  <script src="renderer-gum.js"></script>
+</body>
+</html>

@@ -41,7 +41,7 @@ app.whenReady().then(async () => {
     ? new SQL.Database(fs.readFileSync(dbPath))
     : new SQL.Database();
 
-  // Ensure products table exists
+  // Create tables if not already present
   db.run(`
     CREATE TABLE IF NOT EXISTS products (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -52,7 +52,6 @@ app.whenReady().then(async () => {
     );
   `);
 
-  // Ensure reels table exists
   db.run(`
     CREATE TABLE IF NOT EXISTS reels (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -67,66 +66,94 @@ app.whenReady().then(async () => {
     );
   `);
 
-  // Save DB back to disk
-  fs.writeFileSync(dbPath, Buffer.from(db.export()));
-  console.log(dbExists ? '📂 Loaded and updated existing database.' : '💾 Created new database.');
+  db.run(`
+    CREATE TABLE IF NOT EXISTS gum (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      type TEXT,
+      amount INTEGER
+    );
+  `);
 
+  db.run(`
+    CREATE TABLE IF NOT EXISTS wire (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      amount INTEGER
+    );
+  `);
+
+  fs.writeFileSync(dbPath, Buffer.from(db.export()));
   createWindow();
 });
 
-// Handle adding a reel
+// ========== IPC HANDLERS ==========
+
 ipcMain.on('add-reel', (event, data) => {
   initSqlJs().then(SQL => {
-    const dbBuffer = fs.readFileSync(dbPath);
-    const db = new SQL.Database(dbBuffer);
-
+    const db = new SQL.Database(fs.readFileSync(dbPath));
     db.run(`
       INSERT INTO reels (date, company, size, gsm, bf, weight, amount, type)
       VALUES (?, ?, ?, ?, ?, ?, ?, ?);
     `, [
-      data.date,
-      data.company,
-      data.size,
-      data.gsm,
-      data.bf,
-      data.weight,
-      data.amount,
-      data.type
+      data.date, data.company, data.size, data.gsm,
+      data.bf, data.weight, data.amount, data.type
     ]);
-
     fs.writeFileSync(dbPath, Buffer.from(db.export()));
     event.sender.send('get-reels');
   });
 });
 
-// Handle fetching reels
 ipcMain.on('get-reels', (event) => {
   initSqlJs().then(SQL => {
-    const dbBuffer = fs.readFileSync(dbPath);
-    const db = new SQL.Database(dbBuffer);
+    const db = new SQL.Database(fs.readFileSync(dbPath));
+    const result = db.exec(`
+      SELECT date, company, size, gsm, bf, weight, amount, type
+      FROM reels ORDER BY date DESC;
+    `);
+    const rows = result[0]?.values.map(row => ({
+      date: row[0], company: row[1], size: row[2],
+      gsm: row[3], bf: row[4], weight: row[5],
+      amount: row[6], type: row[7]
+    })) || [];
+    event.sender.send('reels-data', rows);
+  });
+});
 
-    try {
-      const results = db.exec(`
-        SELECT date, company, size, gsm, bf, weight, amount, type 
-        FROM reels 
-        ORDER BY date DESC;
-      `);
+ipcMain.on('add-gum', (event, data) => {
+  initSqlJs().then(SQL => {
+    const db = new SQL.Database(fs.readFileSync(dbPath));
+    db.run(`
+      INSERT INTO gum (type, amount) VALUES (?, ?);
+    `, [data.type, data.amount]);
+    fs.writeFileSync(dbPath, Buffer.from(db.export()));
+    event.sender.send('get-gum');
+  });
+});
 
-      const rows = results[0]?.values.map(row => ({
-        date: row[0],
-        company: row[1],
-        size: row[2],
-        gsm: row[3],
-        bf: row[4],
-        weight: row[5],
-        amount: row[6],
-        type: row[7]
-      })) || [];
+ipcMain.on('get-gum', (event) => {
+  initSqlJs().then(SQL => {
+    const db = new SQL.Database(fs.readFileSync(dbPath));
+    const result = db.exec(`SELECT type, amount FROM gum;`);
+    const rows = result[0]?.values.map(row => ({
+      type: row[0], amount: row[1]
+    })) || [];
+    event.sender.send('gum-data', rows);
+  });
+});
 
-      event.sender.send('reels-data', rows);
-    } catch (err) {
-      console.error('Error reading reels:', err.message);
-      event.sender.send('reels-data', []);
-    }
+ipcMain.on('add-wire', (event, data) => {
+  initSqlJs().then(SQL => {
+    const db = new SQL.Database(fs.readFileSync(dbPath));
+    db.run(`INSERT INTO wire (amount) VALUES (?);`, [data.amount]);
+    fs.writeFileSync(dbPath, Buffer.from(db.export()));
+    event.sender.send('get-wire');
+  });
+});
+
+ipcMain.on('get-wire', (event) => {
+  initSqlJs().then(SQL => {
+    const db = new SQL.Database(fs.readFileSync(dbPath));
+    const result = db.exec(`SELECT amount FROM wire;`);
+    const rows = result[0]?.values.map(row => ({ amount: row[0] })) || [];
+    event.sender.send('wire-data', rows);
   });
 });
